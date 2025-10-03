@@ -34,7 +34,7 @@ pnpm run gen:jwks
 Copy the printed SIGNING_JWKS (private) to your envs.
 
 ## 	Local dev
-
+ 
 ```bash
 cp .env.example .env.local   # (optional for vercel dev)
 vercel dev
