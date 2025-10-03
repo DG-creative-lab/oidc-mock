@@ -1,0 +1,36 @@
+# Node / pnpm
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# Vercel
+.vercel/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+out/
+.next/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Mac / OS cruft
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Editor settings
+.vscode/
+.idea/
