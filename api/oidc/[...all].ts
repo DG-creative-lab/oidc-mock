@@ -1,15 +1,15 @@
-// api/oidc.ts
 import type { Configuration } from 'oidc-provider';
 import { Provider } from 'oidc-provider';
 import { getConfig } from '../../src/config.js';
+
+export const config = { runtime: 'nodejs', api: { bodyParser: false } };
 
 let provider: Provider | undefined;
 
 async function getProvider() {
   if (!provider) {
     const cfg = getConfig();
-
-    const config: Configuration = {
+    const oidcCfg: Configuration = {
       clients: [
         {
           client_id: cfg.CLIENT_ID,
@@ -24,35 +24,30 @@ async function getProvider() {
       cookies: { keys: cfg.COOKIE_KEYS },
       features: { devInteractions: { enabled: true } },
       proxy: true,
-      // optional: expose /authorize instead of /auth
-      // routes: { authorization: '/authorize' },
+      // routes: { authorization: '/authorize' }, // optional alias
     };
-
-    provider = new Provider(cfg.ISSUER, config);
+    provider = new Provider(cfg.ISSUER, oidcCfg);
   }
   return provider!;
 }
 
-// set runtime explicitly (no vercel.json needed)
-export const config = { runtime: 'nodejs20.x', api: { bodyParser: false } };
-
 export default async function handler(req: any, res: any) {
   const p = await getProvider();
 
-  // normalize path: strip base prefix so oidc-provider sees its native routes
+  // strip the base so oidc-provider sees native paths
   const base = '/api/oidc';
   if (req.url?.startsWith(base)) req.url = req.url.slice(base.length) || '/';
 
-  // small landing hint
+  // (optional) allow /authorize spelling
+  if (req.url === '/authorize' || req.url?.startsWith('/authorize?')) {
+    req.url = req.url.replace('/authorize', '/auth');
+  }
+
+  // tiny landing text at base
   if (req.url === '/' && req.method === 'GET') {
     res.setHeader('content-type', 'text/plain; charset=utf-8');
     res.end('OIDC mock running. Try /.well-known/openid-configuration');
     return;
-  }
-
-  // accept /authorize alias
-  if (req.url === '/authorize' || req.url?.startsWith('/authorize?')) {
-    req.url = req.url.replace('/authorize', '/auth');
   }
 
   return p.callback()(req, res);
