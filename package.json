@@ -6,7 +6,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "node --loader ts-node/esm api/oidc/[...all].ts",
+    "vercel:dev": "vercel dev",
     "gen:jwks": "node ./scripts/generate-jwks.mjs",
     "typecheck": "tsc --noEmit"
   },

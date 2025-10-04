@@ -1,4 +1,4 @@
-// api/oidc/[...all].ts
+// api/oidc.ts
 import type { Configuration } from 'oidc-provider';
 import { Provider } from 'oidc-provider';
 import { getConfig } from '../../src/config.js';
@@ -19,17 +19,14 @@ async function getProvider() {
           token_endpoint_auth_method: 'client_secret_basic',
         },
       ],
-      // Use a stable signing key (private JWK) so tokens stay verifiable across cold starts
       jwks: cfg.SIGNING_JWKS,
       cookies: { keys: cfg.COOKIE_KEYS },
-      features: {
-        devInteractions: { enabled: true }, // handy fake login UI
-      },
-      proxy: true, // trust Vercel's proxy for secure cookies, HTTPS, etc.
+      features: { devInteractions: { enabled: true } },
+      proxy: true,
+      // (optional) expose /authorize instead of /auth:
+      // routes: { authorization: '/authorize' },
     };
-
     provider = new Provider(cfg.ISSUER, config);
-    await provider.initialize();
   }
   return provider!;
 }
@@ -38,5 +35,24 @@ export const config = { api: { bodyParser: false } };
 
 export default async function handler(req: any, res: any) {
   const p = await getProvider();
+
+  // Strip the base prefix so oidc-provider sees the canonical paths
+  const base = '/api/oidc';
+  if (req.url?.startsWith(base)) {
+    req.url = req.url.slice(base.length) || '/';
+  }
+
+  // Optional nicety: show a message at the base
+  if (req.url === '/' && req.method === 'GET') {
+    res.setHeader('content-type', 'text/plain; charset=utf-8');
+    res.end('OIDC mock running. Try /.well-known/openid-configuration');
+    return;
+  }
+
+  // Allow /authorize if you prefer that spelling
+  if (req.url === '/authorize' || req.url?.startsWith('/authorize?')) {
+    req.url = req.url.replace('/authorize', '/auth');
+  }
+
   return p.callback()(req, res);
 }

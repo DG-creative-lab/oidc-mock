@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "functions": {
+    "api/oidc.ts": { "runtime": "nodejs20.x", "memory": 1024 }
+  },
+  "rewrites": [
+    { "source": "/api/oidc/(.*)", "destination": "/api/oidc" }
+  ]
+}
