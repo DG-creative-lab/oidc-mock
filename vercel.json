@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/oidc/.well-known/openid-configuration", "destination": "/api/oidc" },
+    { "source": "/api/oidc/jwks", "destination": "/api/oidc" },
+    { "source": "/api/oidc/(.*)", "destination": "/api/oidc" }
+  ]
+}
