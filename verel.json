@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/oidc/[...all].ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/oidc/(.*)",
+      "dest": "/api/oidc/[...all].ts"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
