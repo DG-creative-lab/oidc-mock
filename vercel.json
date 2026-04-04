@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/oidc/:oidc_path*",
+      "destination": "/api/oidc?oidc_path=:oidc_path*"
+    }
+  ]
+}
