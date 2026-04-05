@@ -15,7 +15,7 @@ async function getProvider() {
           client_id: cfg.CLIENT_ID,
           client_secret: cfg.CLIENT_SECRET,
           redirect_uris: cfg.REDIRECT_URIS,
-          grant_types: ['authorization_code', 'refresh_token', 'client_credentials'],
+          grant_types: ['authorization_code', 'refresh_token'],
           response_types: ['code'],
           token_endpoint_auth_method: 'client_secret_basic',
         },
