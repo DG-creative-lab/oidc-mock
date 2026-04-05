@@ -6,6 +6,36 @@ export const config = { runtime: 'nodejs', api: { bodyParser: false } };
 
 let provider: Provider | undefined;
 
+function buildAccount(sub: string) {
+  const normalized = String(sub || '').trim() || 'demo@example.com';
+  const email = normalized.includes('@') ? normalized : `${normalized}@example.com`;
+  const nameSource = email.split('@')[0] || 'demo';
+  const displayName = nameSource
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
+  return {
+    accountId: email,
+    async claims(_use: string, scope: string) {
+      const claims: Record<string, unknown> = { sub: email };
+
+      if (scope.includes('email')) {
+        claims.email = email;
+        claims.email_verified = true;
+        claims.preferred_username = email;
+      }
+
+      if (scope.includes('profile')) {
+        claims.name = displayName || email;
+      }
+
+      return claims;
+    },
+  };
+}
+
 async function getProvider() {
   if (!provider) {
     const cfg = getConfig();
@@ -20,6 +50,12 @@ async function getProvider() {
           token_endpoint_auth_method: 'client_secret_basic',
         },
       ],
+      claims: {
+        openid: ['sub'],
+        email: ['email', 'email_verified', 'preferred_username'],
+        profile: ['name'],
+      },
+      findAccount: async (_ctx: unknown, sub: string) => buildAccount(sub),
       jwks: cfg.SIGNING_JWKS,
       cookies: { keys: cfg.COOKIE_KEYS },
       features: { devInteractions: { enabled: true } },
@@ -88,11 +124,11 @@ function buildDiscoveryDocument(issuer: string) {
       'Ed25519',
       'EdDSA',
     ],
-    claims_supported: ['sub', 'sid', 'auth_time', 'iss'],
+    claims_supported: ['sub', 'email', 'email_verified', 'preferred_username', 'name', 'sid', 'auth_time', 'iss'],
     claim_types_supported: ['normal'],
     claims_parameter_supported: false,
     code_challenge_methods_supported: ['S256'],
-    scopes_supported: ['openid', 'offline_access'],
+    scopes_supported: ['openid', 'profile', 'email', 'offline_access'],
     authorization_response_iss_parameter_supported: true,
     request_uri_parameter_supported: false,
     dpop_signing_alg_values_supported: ['ES256', 'Ed25519', 'EdDSA'],
