@@ -5,6 +5,10 @@
       "destination": "/api/oidc?oidc_path=:oidc_path*"
     },
     {
+      "source": "/auth/:oidc_path*",
+      "destination": "/api/oidc?oidc_path=auth/:oidc_path*"
+    },
+    {
       "source": "/interaction/:oidc_path*",
       "destination": "/api/oidc?oidc_path=interaction/:oidc_path*"
     }
